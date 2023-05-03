@@ -92,17 +92,10 @@ const pacientesTransformStream = new Transform({
 
 const outputStream = fs.createWriteStream(output);
 
-const writableStream = new Transform(({
-  writableObjectMode: true,
-  write(chunk) {
-    console.log(chunk)
-  }
-}))
-
 fs.createReadStream(filePath)
   .pipe(parser({ separator: ';' }))
   .pipe(pacientesTransformStream)
-  .pipe(writableStream)
+  .pipe(outputStream)
   .on('error', (err: any) => {
     console.warn('Error to write data', err);
   })

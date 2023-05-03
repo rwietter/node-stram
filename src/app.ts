@@ -12,38 +12,69 @@ const parser = require('csv-parser')
 const filePath = path.join(__dirname, '..', 'data', '20230502_Ano2022.csv')
 const output = path.join(__dirname, '..', 'data', 'out.json')
 
-// const inputStream = fs.createReadStream(filePath);
-// const outputStream = fs.createWriteStream(output);
+const inputStream = fs.createReadStream(filePath);
+const outputStream = fs.createWriteStream(output);
 
-// inputStream.pipe(csvtojson({ delimiter: ";;" }))
-//   .on('data', (row: any) => {
-//     const json = JSON.stringify(row);
-//     console.log(row)
-//     // outputStream.write(json + '\n');
-//   })
-//   .on('end', () => {
-//     outputStream.end();
-//   });
+const headers = [
+  'COD_IBGE',
+  'MUNICIPIO',
+  'COD_REGIAO_COVID',
+  'REGIAO_COVID',
+  'SEXO',
+  'FAIXAETARIA',
+  'IDADE',
+  'CRITERIO',
+  'DATA_CONFIRMACAO',
+  'DATA_SINTOMAS',
+  'DATA_INCLUSAO',
+  'DATA_EVOLUCAO',
+  'EVOLUCAO',
+  'HOSPITALIZADO',
+  'UTI',
+  'FEBRE',
+  'TOSSE',
+  'GARGANTA',
+  'DISPNEIA',
+  'OUTROS',
+  'CONDICOES',
+  'GESTANTE',
+  'DATA_INCLUSAO_OBITO',
+  'DATA_EVOLUCAO_ESTIMADA',
+  'RACA_COR',
+  'ETNIA_INDIGENA',
+  'PROFISSIONAL_SAUDE',
+  'BAIRRO',
+  'SRAG',
+  'FONTE_INFORMACAO',
+  'PAIS_NASCIMENTO',
+  'PES_PRIV_LIBERDADE',
+]
 
-// const results: any = []
+inputStream.pipe(csvtojson({ delimiter: [';'], headers: headers, output: 'json' }))
+  .on('data', (row: any) => {
+    const json = Buffer.from(row).toString();
+    outputStream.write(json);
+  })
+  .on('end', () => {
+    outputStream.end();
+  });
 
-// let count = 1
+
+/** Script 2 */
+const results: any = []
 
 // fs.createReadStream(filePath)
 //   .pipe(parser({ separator: ';' }))
 //   .on('data', (data: any) => {
-//     if (count === 5000) return data;
 //     results.push(data)
-//     count += 1
 //   })
 //   .on('end', () => {
 //     fs.writeFileSync(output, JSON.stringify(results, null, 2));
 //     console.log('Arquivo convertido para JSON com sucesso!');
 //   });
 
-// const json = require('../data/out.json')
-// console.log(json.length)
 
+/** Script 3 */
 const adverbToBoolean = (adv: boolean | string) => {
   return adv === 'NAO' ? false : true
 }
@@ -90,15 +121,14 @@ const pacientesTransformStream = new Transform({
   }
 });
 
-const outputStream = fs.createWriteStream(output);
 
-fs.createReadStream(filePath)
-  .pipe(parser({ separator: ';' }))
-  .pipe(pacientesTransformStream)
-  .pipe(outputStream)
-  .on('error', (err: any) => {
-    console.warn('Error to write data', err);
-  })
-  .on('finish', () => {
-    console.log('Arquivo salvo com sucesso!');
-  });
+// fs.createReadStream(filePath)
+//   .pipe(parser({ separator: ';' }))
+//   .pipe(pacientesTransformStream)
+//   .pipe(outputStream)
+//   .on('error', (err: any) => {
+//     console.warn('Error to write data', err);
+//   })
+//   .on('finish', () => {
+//     console.log('Arquivo salvo com sucesso!');
+//   });

@@ -1,0 +1,25 @@
+{
+  "devDependencies": {
+    "@types/json2csv": "^5.0.3",
+    "@types/lodash": "^4.14.194",
+    "@types/node": "^18.16.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "dev": "tsnd src/app.ts",
+    "stream": "tsnd src/stream.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "csv": "^6.2.11",
+    "csv-parser": "^3.0.0",
+    "csv-write-stream": "^2.0.0",
+    "csvjson-csv2json": "^5.0.6",
+    "csvtojson": "^2.0.10",
+    "json-2-csv": "^4.0.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "lodash": "^4.17.21",
+    "pumpify": "^2.0.1"
+  }
+}

@@ -51,9 +51,40 @@ const headers = [
 ]
 
 inputStream.pipe(csvtojson({ delimiter: [';'], headers: headers, output: 'json' }))
-  .on('data', (row: any) => {
-    const json = Buffer.from(row).toString();
-    outputStream.write(json);
+  .on('data', (chunk: any) => {
+    const json = JSON.parse(Buffer.from(chunk).toString());
+    const paciente = {
+      cod_ibge: Object.values(json)[0],
+      municipio: json.MUNICIPIO,
+      cod_regiao_covid: json.COD_REGIAO_COVID,
+      regiao_covid: json.REGIAO_COVID,
+      sexo: json.SEXO,
+      faixa_etaria: json.FAIXAETARIA,
+      idade: json.IDADE,
+      criterio: json.CRITERIO,
+      data_confirmacao: json.DATA_CONFIRMACAO,
+      data_sintomas: json.DATA_SINTOMAS,
+      data_inclusao: json.DATA_INCLUSAO,
+      data_evolucao: json.DATA_EVOLUCAO,
+      evolucao: adverbToBoolean(json.EVOLUCAO),
+      hospitalizado: adverbToBoolean(json.HOSPITALIZADO),
+      uti: adverbToBoolean(json.UTI),
+      febre: adverbToBoolean(json.FEBRE),
+      tosse: adverbToBoolean(json.TOSSE),
+      garganta: adverbToBoolean(json.GARGANTA),
+      dispneia: adverbToBoolean(json.DISPNEIA),
+      outros: adverbToBoolean(json.OUTROS),
+      condicoes: json.CONDICOES,
+      gestante: json.GESTANTE,
+      data_inclusao_obito: json.DATA_INCLUSAO_OBITO,
+      data_evolucao_estimada: adverbToBoolean(json.DATA_EVOLUCAO_ESTIMADA),
+      raca_cor: json.RACA_COR,
+      etnia_indigena: adverbToBoolean(json.ETNIA_INDIGENA),
+      profissional_saude: json.PROFISSIONAL_SAUDE,
+      bairro: json.BAIRRO,
+      srag: adverbToBoolean(json.SRAG),
+    }
+    outputStream.write(JSON.stringify(paciente) + '\n');
   })
   .on('end', () => {
     outputStream.end();

@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  mongo:
+    image: mwitterc/covid-db:v1
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rwietter
+      MONGO_INITDB_ROOT_PASSWORD: rw19
+    ports:
+      - "27017:27017"
+    volumes:
+      - /mongodb_data:/data/db
+
+# create volume: docker volume create mongodbdata
+
+# docker run -d --name covid-insights -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=covid-insights -e MONGO_INITDB_ROOT_PASSWORD=e296dh53 mongo
+# docker exec -it 08bf9c868433 mongo -u covid-insights -p e296dh53 --authenticationDatabase admin
+# use covid-insights
+# db.createUser( { user: "rwietter", pwd: "rw19", roles: [ { role: "readWrite", db: "covid-insights" } ] })
+
+# mongo --host localhost --port 27017:27017 --authenticationDatabase admin -u rwietter -p

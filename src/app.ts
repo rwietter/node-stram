@@ -1,165 +1,75 @@
-import { Transform } from "stream";
-import { IPaciente, Paciente } from "../types/Paciente";
+import { headers } from "./constants/headers";
+import csvtojson from 'csvtojson';
+import path from 'path';
+import fs from 'fs';
 
-const path = require("path");
-const fs = require('fs');
-const csvtojson = require("csvtojson");
-const { Readable } = require("node:stream");
-// const json2csv = require('json2csv')
-const parser = require('csv-parser')
-// const { Transform } = require('stream');
+const fileCsvPatch = path.join(__dirname, '..', 'data', '20230502_Ano2022.csv')
+const outputJSON = path.join(__dirname, '..', 'data', 'out.json')
 
-const filePath = path.join(__dirname, '..', 'data', '20230502_Ano2022.csv')
-const output = path.join(__dirname, '..', 'data', 'out.json')
+const inputStream = fs.createReadStream(fileCsvPatch);
+let outputStream = fs.createWriteStream(outputJSON);
 
-const inputStream = fs.createReadStream(filePath);
-const outputStream = fs.createWriteStream(output);
+outputStream.write('[');
 
-const headers = [
-  'COD_IBGE',
-  'MUNICIPIO',
-  'COD_REGIAO_COVID',
-  'REGIAO_COVID',
-  'SEXO',
-  'FAIXAETARIA',
-  'IDADE',
-  'CRITERIO',
-  'DATA_CONFIRMACAO',
-  'DATA_SINTOMAS',
-  'DATA_INCLUSAO',
-  'DATA_EVOLUCAO',
-  'EVOLUCAO',
-  'HOSPITALIZADO',
-  'UTI',
-  'FEBRE',
-  'TOSSE',
-  'GARGANTA',
-  'DISPNEIA',
-  'OUTROS',
-  'CONDICOES',
-  'GESTANTE',
-  'DATA_INCLUSAO_OBITO',
-  'DATA_EVOLUCAO_ESTIMADA',
-  'RACA_COR',
-  'ETNIA_INDIGENA',
-  'PROFISSIONAL_SAUDE',
-  'BAIRRO',
-  'SRAG',
-  'FONTE_INFORMACAO',
-  'PAIS_NASCIMENTO',
-  'PES_PRIV_LIBERDADE',
-]
+/**
+ * Converte local date string para ISO Date 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
+ *
+ * Para fazer a conversão inversa considere usar timeZone UTC (toISOString)
+ * use: new Date().toLocaleDateString('pt-BR', {timeZone: 'UTC'})
 
-inputStream.pipe(csvtojson({ delimiter: [';'], headers: headers, output: 'json' }))
+ * @param date:string => DD/MM/YYYY
+ * @returns string => YYYY-MM-DD:THH:mm:ss.sssZ
+ */
+const toIsoDate = (date: string) => {
+  if (!date) return null;
+
+  const [day, month, year] = date.split('/');
+  const dateISOString = `${year}-${month}-${day}`;
+  return new Date(dateISOString).toISOString();
+}
+
+inputStream.pipe(csvtojson({ delimiter: [';'], headers, output: 'json' }))
   .on('data', (chunk: any) => {
-    const json = JSON.parse(Buffer.from(chunk).toString());
+    const pacienteJSON = JSON.parse(Buffer.from(chunk).toString());
     const paciente = {
-      cod_ibge: Object.values(json)[0],
-      municipio: json.MUNICIPIO,
-      cod_regiao_covid: json.COD_REGIAO_COVID,
-      regiao_covid: json.REGIAO_COVID,
-      sexo: json.SEXO,
-      faixa_etaria: json.FAIXAETARIA,
-      idade: json.IDADE,
-      criterio: json.CRITERIO,
-      data_confirmacao: json.DATA_CONFIRMACAO,
-      data_sintomas: json.DATA_SINTOMAS,
-      data_inclusao: json.DATA_INCLUSAO,
-      data_evolucao: json.DATA_EVOLUCAO,
-      evolucao: adverbToBoolean(json.EVOLUCAO),
-      hospitalizado: adverbToBoolean(json.HOSPITALIZADO),
-      uti: adverbToBoolean(json.UTI),
-      febre: adverbToBoolean(json.FEBRE),
-      tosse: adverbToBoolean(json.TOSSE),
-      garganta: adverbToBoolean(json.GARGANTA),
-      dispneia: adverbToBoolean(json.DISPNEIA),
-      outros: adverbToBoolean(json.OUTROS),
-      condicoes: json.CONDICOES,
-      gestante: json.GESTANTE,
-      data_inclusao_obito: json.DATA_INCLUSAO_OBITO,
-      data_evolucao_estimada: adverbToBoolean(json.DATA_EVOLUCAO_ESTIMADA),
-      raca_cor: json.RACA_COR,
-      etnia_indigena: adverbToBoolean(json.ETNIA_INDIGENA),
-      profissional_saude: json.PROFISSIONAL_SAUDE,
-      bairro: json.BAIRRO,
-      srag: adverbToBoolean(json.SRAG),
+      cod_ibge: Object.values(pacienteJSON)[0],
+      municipio: pacienteJSON.MUNICIPIO,
+      cod_regiao_covid: pacienteJSON.COD_REGIAO_COVID,
+      regiao_covid: pacienteJSON.REGIAO_COVID,
+      sexo: pacienteJSON.SEXO,
+      faixa_etaria: pacienteJSON.FAIXAETARIA,
+      idade: pacienteJSON.IDADE,
+      criterio: pacienteJSON.CRITERIO,
+      data_confirmacao: toIsoDate(pacienteJSON.DATA_CONFIRMACAO),
+      data_sintomas: toIsoDate(pacienteJSON.DATA_SINTOMAS),
+      data_inclusao: toIsoDate(pacienteJSON.DATA_INCLUSAO),
+      data_evolucao: toIsoDate(pacienteJSON.DATA_EVOLUCAO),
+      evolucao: pacienteJSON.EVOLUCAO,
+      hospitalizado: adverbToBoolean(pacienteJSON.HOSPITALIZADO),
+      uti: adverbToBoolean(pacienteJSON.UTI),
+      febre: adverbToBoolean(pacienteJSON.FEBRE),
+      tosse: adverbToBoolean(pacienteJSON.TOSSE),
+      garganta: adverbToBoolean(pacienteJSON.GARGANTA),
+      dispneia: adverbToBoolean(pacienteJSON.DISPNEIA),
+      outros: adverbToBoolean(pacienteJSON.OUTROS),
+      condicoes: pacienteJSON.CONDICOES,
+      gestante: adverbToBoolean(pacienteJSON.GESTANTE),
+      data_inclusao_obito: pacienteJSON.DATA_INCLUSAO_OBITO,
+      data_evolucao_estimada: pacienteJSON.DATA_EVOLUCAO_ESTIMADA,
+      raca_cor: pacienteJSON.RACA_COR,
+      etnia_indigena: pacienteJSON.ETNIA_INDIGENA,
+      profissional_saude: adverbToBoolean(pacienteJSON.PROFISSIONAL_SAUDE),
+      bairro: pacienteJSON.BAIRRO,
+      srag: adverbToBoolean(pacienteJSON.SRAG),
     }
-    outputStream.write(JSON.stringify(paciente) + '\n');
+
+    outputStream.write(JSON.stringify(paciente) + ',\n');
   })
   .on('end', () => {
+    outputStream.write(']');
     outputStream.end();
   });
 
-
-/** Script 2 */
-const results: any = []
-
-// fs.createReadStream(filePath)
-//   .pipe(parser({ separator: ';' }))
-//   .on('data', (data: any) => {
-//     results.push(data)
-//   })
-//   .on('end', () => {
-//     fs.writeFileSync(output, JSON.stringify(results, null, 2));
-//     console.log('Arquivo convertido para JSON com sucesso!');
-//   });
-
-
-/** Script 3 */
 const adverbToBoolean = (adv: boolean | string) => {
-  return adv === 'NAO' ? false : true
+  return adv === 'NAO' ? false : adv === 'SIM' ? true : null;
 }
-
-const pacientesTransformStream = new Transform({
-  writableObjectMode: true,
-  transform(chunk: Paciente, encoding, callback) {
-    try {
-      const paciente = {
-        cod_ibge: Object.values(chunk)[0],
-        municipio: chunk.MUNICIPIO,
-        cod_regiao_covid: chunk.COD_REGIAO_COVID,
-        regiao_covid: chunk.REGIAO_COVID,
-        sexo: chunk.SEXO,
-        faixa_etaria: chunk.FAIXAETARIA,
-        idade: chunk.IDADE,
-        criterio: chunk.CRITERIO,
-        data_confirmacao: chunk.DATA_CONFIRMACAO,
-        data_sintomas: chunk.DATA_SINTOMAS,
-        data_inclusao: chunk.DATA_INCLUSAO,
-        data_evolucao: chunk.DATA_EVOLUCAO,
-        evolucao: adverbToBoolean(chunk.EVOLUCAO),
-        hospitalizado: adverbToBoolean(chunk.HOSPITALIZADO),
-        uti: adverbToBoolean(chunk.UTI),
-        febre: adverbToBoolean(chunk.FEBRE),
-        tosse: adverbToBoolean(chunk.TOSSE),
-        garganta: adverbToBoolean(chunk.GARGANTA),
-        dispneia: adverbToBoolean(chunk.DISPNEIA),
-        outros: adverbToBoolean(chunk.OUTROS),
-        condicoes: chunk.CONDICOES,
-        gestante: chunk.GESTANTE,
-        data_inclusao_obito: chunk.DATA_INCLUSAO_OBITO,
-        data_evolucao_estimada: adverbToBoolean(chunk.DATA_EVOLUCAO_ESTIMADA),
-        raca_cor: chunk.RACA_COR,
-        etnia_indigena: adverbToBoolean(chunk.ETNIA_INDIGENA),
-        profissional_saude: chunk.PROFISSIONAL_SAUDE,
-        bairro: chunk.BAIRRO,
-        srag: adverbToBoolean(chunk.SRAG),
-      };
-      callback(null, JSON.stringify(paciente) + ',');
-    } catch (error: any) {
-      callback(error);
-    }
-  }
-});
-
-
-// fs.createReadStream(filePath)
-//   .pipe(parser({ separator: ';' }))
-//   .pipe(pacientesTransformStream)
-//   .pipe(outputStream)
-//   .on('error', (err: any) => {
-//     console.warn('Error to write data', err);
-//   })
-//   .on('finish', () => {
-//     console.log('Arquivo salvo com sucesso!');
-//   });

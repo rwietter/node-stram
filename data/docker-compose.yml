@@ -2,14 +2,15 @@ version: '3'
 
 services:
   mongo:
-    image: mwitterc/covid-db:v1
+    image: mwitterc/covid-db:v2
+    # image: covid-db:1.9
     environment:
       MONGO_INITDB_ROOT_USERNAME: rwietter
       MONGO_INITDB_ROOT_PASSWORD: rw19
     ports:
       - "27017:27017"
     volumes:
-      - /mongodb_data:/data/db
+      - /datamongo:/data/db
 
 # create volume: docker volume create mongodbdata
 

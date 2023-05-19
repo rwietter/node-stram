@@ -2,8 +2,8 @@ version: '3'
 
 services:
   mongo:
-    image: mwitterc/covid-db:v2
-    # image: covid-db:1.9
+    image: covid-db:1.9
+    # image: mwitterc/covid-db:v2
     environment:
       MONGO_INITDB_ROOT_USERNAME: rwietter
       MONGO_INITDB_ROOT_PASSWORD: rw19
